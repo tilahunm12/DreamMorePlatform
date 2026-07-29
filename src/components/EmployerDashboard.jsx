@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Briefcase, Users, CheckCircle, Clock, DollarSign, ChevronRight, UserCheck, MessageSquare, AlertCircle, XCircle } from 'lucide-react';
+import { PlusCircle, Briefcase, Users, CheckCircle, Clock, DollarSign, ChevronRight, UserCheck, MessageSquare, AlertCircle, XCircle, ExternalLink, Star } from 'lucide-react';
 import { fetchProposals, updateProposalStatus } from '../services/api';
+import { ProposalSkeleton } from './SkeletonLoader';
 
-export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh }) {
+export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh, onRateFreelancer }) {
   const [selectedJob, setSelectedJob] = useState(null);
   const [proposals, setProposals] = useState([]);
   const [loadingProposals, setLoadingProposals] = useState(false);
@@ -129,7 +130,9 @@ export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh }) 
                       {job.category}
                     </span>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${
-                      job.status === 'open' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400'
+                      job.status === 'open' ? 'bg-emerald-500/10 text-emerald-400' :
+                      job.status === 'completed' ? 'bg-purple-500/10 text-purple-400' :
+                      'bg-blue-500/10 text-blue-400'
                     }`}>
                       {job.status}
                     </span>
@@ -179,7 +182,10 @@ export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh }) 
 
               {/* Proposals Cards */}
               {loadingProposals ? (
-                <div className="text-center py-10 text-slate-400 text-sm">Loading proposals...</div>
+                <div className="space-y-4">
+                  <ProposalSkeleton />
+                  <ProposalSkeleton />
+                </div>
               ) : proposals.length === 0 ? (
                 <div className="text-center py-10 glass-card rounded-2xl border border-slate-800 text-slate-400 text-sm space-y-2">
                   <p>No proposals submitted for this job yet.</p>
@@ -220,11 +226,35 @@ export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh }) 
                         "{prop.proposal_text}"
                       </div>
 
+                      {/* Submitted Deliverables Banner if status is 'submitted' or 'completed' */}
+                      {prop.submitted_work && (
+                        <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-indigo-400 flex items-center gap-1">
+                              <CheckCircle className="w-3.5 h-3.5" /> Submitted Deliverables ({prop.submitted_work.submitted_at})
+                            </span>
+                            {prop.submitted_work.repository_url && (
+                              <a
+                                href={prop.submitted_work.repository_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-indigo-400 hover:underline flex items-center gap-1 font-mono"
+                              >
+                                Code Repo <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-300 italic">"{prop.submitted_work.notes}"</p>
+                        </div>
+                      )}
+
                       {/* Status & Action Buttons */}
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-slate-400">Status:</span>
                           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase ${
+                            prop.status === 'completed' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
+                            prop.status === 'submitted' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
                             prop.status === 'accepted' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                             prop.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                             'bg-amber-500/10 text-amber-400 border border-amber-500/20'
@@ -249,6 +279,23 @@ export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh }) 
                             </button>
                           </div>
                         )}
+
+                        {prop.status === 'submitted' && (
+                          <button
+                            onClick={() => onRateFreelancer(prop)}
+                            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-all shadow-md shadow-indigo-600/20"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-white" />
+                            <span>Review & Complete Contract</span>
+                          </button>
+                        )}
+
+                        {prop.status === 'completed' && prop.rating && (
+                          <div className="flex items-center gap-1 text-xs text-amber-400 font-bold">
+                            <span>Rated: ★ {prop.rating}.0</span>
+                          </div>
+                        )}
+
                       </div>
 
                     </div>
@@ -266,3 +313,4 @@ export default function EmployerDashboard({ jobs, onOpenPostModal, onRefresh }) 
     </div>
   );
 }
+

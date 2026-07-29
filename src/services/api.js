@@ -227,3 +227,49 @@ export const updateProposalStatus = async (proposal_id, status) => {
   }
   return { status: 'success', message: `Proposal status updated to ${status}` };
 };
+
+export const submitWork = async (workData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/submit_work.php`, workData, { timeout: 2500 });
+    if (response.data && response.data.status === 'success') {
+      return response.data;
+    }
+  } catch (error) {
+    // Fallback mock
+  }
+
+  const prop = mockProposals.find(p => p.id === workData.proposal_id);
+  if (prop) {
+    prop.status = 'submitted';
+    prop.submitted_work = {
+      work_url: workData.work_url,
+      repository_url: workData.repository_url,
+      notes: workData.notes,
+      submitted_at: new Date().toISOString().split('T')[0]
+    };
+  }
+  return { status: 'success', message: 'Work deliverables submitted successfully' };
+};
+
+export const submitReview = async (reviewData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/submit_review.php`, reviewData, { timeout: 2500 });
+    if (response.data && response.data.status === 'success') {
+      return response.data;
+    }
+  } catch (error) {
+    // Fallback mock
+  }
+
+  const prop = mockProposals.find(p => p.id === reviewData.proposal_id);
+  if (prop) {
+    prop.status = 'completed';
+    prop.rating = reviewData.rating;
+    prop.review_text = reviewData.review_text;
+
+    const job = mockJobs.find(j => j.id === prop.job_id);
+    if (job) job.status = 'completed';
+  }
+  return { status: 'success', message: 'Contract completed & rated successfully' };
+};
+

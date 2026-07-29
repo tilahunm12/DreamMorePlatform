@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { UserCheck, Award, Briefcase, DollarSign, Star, CheckCircle, Clock, FileText, ExternalLink, ShieldCheck, GraduationCap } from 'lucide-react';
+import { UserCheck, Award, Briefcase, DollarSign, Star, CheckCircle, Clock, FileText, ExternalLink, ShieldCheck, GraduationCap, Upload } from 'lucide-react';
 import { fetchProposals } from '../services/api';
+import { ProposalSkeleton } from './SkeletonLoader';
 
-export default function FreelancerDashboard({ onBrowseJobs }) {
+export default function FreelancerDashboard({ onBrowseJobs, onSubmitWork }) {
   const [myProposals, setMyProposals] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,8 +18,8 @@ export default function FreelancerDashboard({ onBrowseJobs }) {
     setLoading(false);
   };
 
-  const acceptedCount = myProposals.filter(p => p.status === 'accepted').length;
-  const totalEarnings = myProposals.filter(p => p.status === 'accepted').reduce((acc, p) => acc + (p.amount || 0), 0);
+  const acceptedCount = myProposals.filter(p => p.status === 'accepted' || p.status === 'submitted' || p.status === 'completed').length;
+  const totalEarnings = myProposals.filter(p => p.status === 'accepted' || p.status === 'submitted' || p.status === 'completed').reduce((acc, p) => acc + (p.amount || 0), 0);
 
   return (
     <div className="space-y-8">
@@ -122,7 +123,10 @@ export default function FreelancerDashboard({ onBrowseJobs }) {
           </h2>
 
           {loading ? (
-            <div className="text-center py-8 text-slate-400 text-sm">Loading applications...</div>
+            <div className="space-y-4">
+              <ProposalSkeleton />
+              <ProposalSkeleton />
+            </div>
           ) : myProposals.length === 0 ? (
             <div className="text-center py-10 glass-card rounded-2xl border border-slate-800 text-slate-400 text-sm">
               You have not submitted any proposals yet.
@@ -149,6 +153,8 @@ export default function FreelancerDashboard({ onBrowseJobs }) {
 
                   <div className="flex items-center justify-between pt-2">
                     <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                      prop.status === 'completed' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
+                      prop.status === 'submitted' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
                       prop.status === 'accepted' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                       prop.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                       'bg-amber-500/10 text-amber-400 border border-amber-500/20'
@@ -157,8 +163,24 @@ export default function FreelancerDashboard({ onBrowseJobs }) {
                     </span>
 
                     {prop.status === 'accepted' && (
-                      <span className="text-xs text-emerald-400 flex items-center gap-1 font-semibold">
-                        <CheckCircle className="w-3.5 h-3.5" /> Hired by Employer
+                      <button
+                        onClick={() => onSubmitWork(prop)}
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-md shadow-indigo-600/20 transition-all"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Submit Work</span>
+                      </button>
+                    )}
+
+                    {prop.status === 'submitted' && (
+                      <span className="text-xs text-indigo-400 font-semibold">
+                        Deliverables Under Employer Review
+                      </span>
+                    )}
+
+                    {prop.status === 'completed' && (
+                      <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" /> Contract Completed & Paid
                       </span>
                     )}
                   </div>
@@ -167,6 +189,7 @@ export default function FreelancerDashboard({ onBrowseJobs }) {
             </div>
           )}
         </div>
+
 
         {/* LMS Verified Skills & Certificates Integration */}
         <div className="glass-panel rounded-2xl p-6 space-y-6 border border-slate-800 lg:col-span-1">

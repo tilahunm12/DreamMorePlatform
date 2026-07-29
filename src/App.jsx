@@ -3,13 +3,17 @@ import Navbar from './components/Navbar';
 import JobMarketplace from './components/JobMarketplace';
 import EmployerDashboard from './components/EmployerDashboard';
 import FreelancerDashboard from './components/FreelancerDashboard';
+import AdminDashboard from './components/AdminDashboard';
 import PostJobModal from './components/PostJobModal';
 import SubmitProposalModal from './components/SubmitProposalModal';
 import JobDetailsModal from './components/JobDetailsModal';
+import SubmitWorkModal from './components/SubmitWorkModal';
+import RateReviewModal from './components/RateReviewModal';
 import { fetchJobs } from './services/api';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('marketplace'); // 'marketplace' | 'employer' | 'freelancer'
+  const [activeTab, setActiveTab] = useState('marketplace'); // 'marketplace' | 'employer' | 'freelancer' | 'admin'
+  const [currentRole, setCurrentRole] = useState('freelancer'); // 'freelancer' | 'employer' | 'admin'
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -20,8 +24,11 @@ export default function App() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isSubmitWorkModalOpen, setIsSubmitWorkModalOpen] = useState(false);
+  const [isRateModalOpen, setIsRateModalOpen] = useState(false);
 
   const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedProposal, setSelectedProposal] = useState(null);
 
   useEffect(() => {
     loadJobs();
@@ -44,12 +51,24 @@ export default function App() {
     setIsApplyModalOpen(true);
   };
 
+  const handleOpenSubmitWork = (proposal) => {
+    setSelectedProposal(proposal);
+    setIsSubmitWorkModalOpen(true);
+  };
+
+  const handleOpenRate = (proposal) => {
+    setSelectedProposal(proposal);
+    setIsRateModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-['Plus_Jakarta_Sans',sans-serif] flex flex-col">
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        currentRole={currentRole}
+        setCurrentRole={setCurrentRole}
         onOpenPostModal={() => setIsPostModalOpen(true)}
       />
 
@@ -58,6 +77,7 @@ export default function App() {
         {activeTab === 'marketplace' && (
           <JobMarketplace
             jobs={jobs}
+            loadingJobs={loadingJobs}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
             searchQuery={searchQuery}
@@ -72,15 +92,25 @@ export default function App() {
             jobs={jobs}
             onOpenPostModal={() => setIsPostModalOpen(true)}
             onRefresh={loadJobs}
+            onRateFreelancer={handleOpenRate}
           />
         )}
 
         {activeTab === 'freelancer' && (
           <FreelancerDashboard
             onBrowseJobs={() => setActiveTab('marketplace')}
+            onSubmitWork={handleOpenSubmitWork}
+          />
+        )}
+
+        {activeTab === 'admin' && (
+          <AdminDashboard
+            jobs={jobs}
+            onRefresh={loadJobs}
           />
         )}
       </main>
+
 
       {/* Footer */}
       <footer className="glass-panel border-t border-slate-800/80 py-8 text-center text-xs text-slate-400">
@@ -116,6 +146,21 @@ export default function App() {
         job={selectedJob}
         onApply={handleOpenApply}
       />
+
+      <SubmitWorkModal
+        isOpen={isSubmitWorkModalOpen}
+        onClose={() => setIsSubmitWorkModalOpen(false)}
+        contract={selectedProposal}
+        onWorkSubmitted={loadJobs}
+      />
+
+      <RateReviewModal
+        isOpen={isRateModalOpen}
+        onClose={() => setIsRateModalOpen(false)}
+        targetItem={selectedProposal}
+        onReviewSubmitted={loadJobs}
+      />
     </div>
   );
 }
+

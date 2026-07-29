@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, DollarSign, Calendar, Clock, ArrowRight, Code, Palette, Cpu, TrendingUp, CheckCircle, ChevronRight, MessageSquare } from 'lucide-react';
+import { JobSkeleton } from './SkeletonLoader';
 
 const CATEGORIES = [
   { id: 'All', label: 'All Jobs', icon: Filter },
@@ -9,7 +10,7 @@ const CATEGORIES = [
   { id: 'Business', label: 'Business & Marketing', icon: TrendingUp }
 ];
 
-export default function JobMarketplace({ jobs, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, onSelectJob, onApplyJob }) {
+export default function JobMarketplace({ jobs, loadingJobs, selectedCategory, setSelectedCategory, searchQuery, setSearchQuery, onSelectJob, onApplyJob }) {
   return (
     <div className="space-y-8">
       
@@ -79,7 +80,14 @@ export default function JobMarketplace({ jobs, selectedCategory, setSelectedCate
       </div>
 
       {/* Jobs Grid */}
-      {jobs.length === 0 ? (
+      {loadingJobs ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <JobSkeleton />
+          <JobSkeleton />
+          <JobSkeleton />
+          <JobSkeleton />
+        </div>
+      ) : jobs.length === 0 ? (
         <div className="glass-panel rounded-2xl p-12 text-center space-y-4 max-w-lg mx-auto">
           <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-500">
             <Search className="w-8 h-8" />
@@ -171,3 +179,4 @@ export default function JobMarketplace({ jobs, selectedCategory, setSelectedCate
     </div>
   );
 }
+
