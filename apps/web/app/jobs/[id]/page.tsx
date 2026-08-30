@@ -266,7 +266,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
                 <div className="flex items-center gap-1.5">
                   <h4 className="font-bold text-white text-base">{job.employer.company}</h4>
                   {job.employer.verified && (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" title="የተረጋገጠ አሰሪ" />
+                    <span title="የተረጋገጠ አሰሪ"><CheckCircle2 className="h-4 w-4 text-emerald-400" /></span>
                   )}
                 </div>
                 <span className="text-xs text-slate-400">{job.employer.name}</span>

@@ -183,7 +183,7 @@ export default function JobsPage() {
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-slate-200">{job.employer.company}</span>
                     {job.employer.verified && (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" title="የተረጋገጠ አሰሪ" />
+                      <span title="የተረጋገጠ አሰሪ"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /></span>
                     )}
                   </div>
                   <div className="flex items-center gap-1">
