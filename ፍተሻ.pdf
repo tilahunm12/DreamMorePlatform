@@ -1,0 +1,42 @@
+Ran command: `npm run dev:api`
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+Used tool: manage_task
+
+አሁን ሁለቱም ክፍሎች (Frontend እና Backend API) ራን አድርገው በቀጥታ እየሰሩ ነው! 🚀
+
+---
+
+### 🌐 አሁኑኑ በብሮውዘርህ ከፍተህ የምትሞክራቸው ገጾች፦
+
+#### 1. የፊት ለፊት ገጾች (Frontend - Next.js)
+👉 **ሊንኩን ክፈት፦** [http://localhost:3000](http://localhost:3000)
+
+* **መነሻ ገጽ (Landing Page)፦** [http://localhost:3000](http://localhost:3000)
+* **የኮርሶች ዝርዝር (Course Catalog)፦** [http://localhost:3000/courses](http://localhost:3000/courses)
+  - በዘርፍ (Programming, Design, CAD, Marketing) አጣራና ፈልግ
+* **የአንድ ኮርስ ዝርዝርና የክፍያ ስክሪንሾት መጫኛ፦** [http://localhost:3000/courses/course-1](http://localhost:3000/courses/course-1)
+  - **"አሁኑኑ ይመዝገቡ (Enroll Now)"** የሚለውን ተጭነህ የቴሌብር/CBE የክፍያ ፎርም ሞክረው
+* **የፍሪላንስ ሥራ ገበያ (AppWorks Jobs)፦** [http://localhost:3000/jobs](http://localhost:3000/jobs)
+* **ለሥራ ፕሮፖዛል ማቅረቢያ፦** [http://localhost:3000/jobs/job-1](http://localhost:3000/jobs/job-1)
+* **አዲስ ሥራ መለጠፊያ (Post a Job)፦** [http://localhost:3000/jobs/post](http://localhost:3000/jobs/post)
+* **ሰርተፊኬት ማረጋገጫ (QR Verification)፦** [http://localhost:3000/verify](http://localhost:3000/verify)
+* **መመዝገቢያና መግቢያ (Auth)፦** [http://localhost:3000/auth/register](http://localhost:3000/auth/register) እና [http://localhost:3000/auth/login](http://localhost:3000/auth/login)
+
+---
+
+#### 2. የተጠቃሚዎች ዳሽቦርድ (Dashboards)
+* **🎓 የተማሪ ዳሽቦርድ፦** [http://localhost:3000/dashboard/student](http://localhost:3000/dashboard/student) (የትምህርት ሂደት መከታተያ፣ የክፍያ ታሪክ)
+* **🛡️ የአድሚን ዳሽቦርድ፦** [http://localhost:3000/dashboard/admin](http://localhost:3000/dashboard/admin) (የተማሪዎችን የክፍያ ስክሪንሾት አይተህ **Approve** ወይም **Reject** የምታደርግበት)
+* **👨‍🏫 የመምህር ዳሽቦርድ፦** [http://localhost:3000/dashboard/teacher](http://localhost:3000/dashboard/teacher) (የኮርሶች አስተዳደር እና ገቢ)
+
+---
+
+#### 3. የጀርባ አሰራር (Backend API - NestJS)
+👉 **የ API አድራሻ፦** `http://localhost:4000/api`
+* `POST http://localhost:4000/api/auth/register` (ተጠቃሚ መመዝገቢያ)
+* `POST http://localhost:4000/api/auth/login` (መግቢያ)
+* `GET http://localhost:4000/api/courses` (የኮርሶች ዳታ)
+* `POST http://localhost:4000/api/payments/submit` (የክፍያ መላኪያ)
+* `GET http://localhost:4000/api/certificates/verify/DM-2026-89412` (ሰርተፊኬት ማረጋገጫ)

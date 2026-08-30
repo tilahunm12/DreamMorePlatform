@@ -1,0 +1,307 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+  TEACHER
+  EMPLOYER
+  FREELANCER
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum JobStatus {
+  POSTED
+  ACTIVE
+  SUBMITTED
+  COMPLETED
+  REJECTED
+  DISPUTED
+}
+
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum CourseStatus {
+  DRAFT
+  PENDING_APPROVAL
+  PUBLISHED
+  REJECTED
+}
+
+model User {
+  id               String                @id @default(uuid())
+  email            String                @unique
+  password         String
+  name             String
+  role             Role                  @default(STUDENT)
+  isVerified       Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  studentProfile   StudentProfile?
+  teacherProfile   TeacherProfile?
+  employerProfile  EmployerProfile?
+  freelancerProfile FreelancerProfile?
+
+  courses          Course[]              @relation("TeacherCourses")
+  enrollments      Enrollment[]
+  payments         Payment[]
+  certificates     Certificate[]
+  jobs             Job[]                 @relation("EmployerJobs")
+  proposals        Proposal[]            @relation("FreelancerProposals")
+  workSubmissions  WorkSubmission[]      @relation("FreelancerSubmissions")
+  reviewsGiven     Review[]              @relation("Reviewer")
+  reviewsReceived  Review[]              @relation("Reviewee")
+  verifications    VerificationRequest[]
+  notifications    Notification[]
+  quizAttempts     QuizAttempt[]
+}
+
+model StudentProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio         String?
+  avatarUrl   String?
+}
+
+model TeacherProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cvUrl          String?
+  credentials    String?
+  portfolioUrl   String?
+  isApproved     Boolean  @default(false)
+}
+
+model EmployerProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName    String?
+  registrationNo String?
+  contactPhone   String?
+}
+
+model FreelancerProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills       String[]
+  bio          String?
+  hourlyRate   Float?
+  rating       Float    @default(0)
+  successRate  Float    @default(100)
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  title       String
+  category    String
+  description String
+  price       Float        @default(0)
+  thumbnail   String?
+  status      CourseStatus @default(DRAFT)
+  teacherId   String
+  teacher     User         @relation("TeacherCourses", fields: [teacherId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  sections    CourseSection[]
+  enrollments Enrollment[]
+  payments    Payment[]
+  certificates Certificate[]
+  reviews     Review[]
+}
+
+model CourseSection {
+  id        String   @id @default(uuid())
+  title     String
+  order     Int
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+}
+
+model Lesson {
+  id          String           @id @default(uuid())
+  title       String
+  videoUrl    String?
+  duration    Int?
+  sectionId   String
+  section     CourseSection    @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  resources   LessonResource[]
+  quizzes     Quiz[]
+}
+
+model LessonResource {
+  id        String   @id @default(uuid())
+  title     String
+  fileUrl   String
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id          String         @id @default(uuid())
+  title       String
+  passScore   Int            @default(70)
+  lessonId    String
+  lesson      Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+}
+
+model QuizQuestion {
+  id            String   @id @default(uuid())
+  question      String
+  options       String[]
+  correctAnswer String
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id        String   @id @default(uuid())
+  score     Float
+  passed    Boolean
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Enrollment {
+  id                 String   @id @default(uuid())
+  progressPercentage Float    @default(0)
+  isCompleted        Boolean  @default(false)
+  studentId          String
+  student            User     @relation(fields: [studentId], references: [id])
+  courseId           String
+  course             Course   @relation(fields: [courseId], references: [id])
+  createdAt          DateTime @default(now())
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  transactionId String
+  screenshotUrl String
+  amount        Float
+  status        PaymentStatus @default(PENDING)
+  studentId     String
+  student       User          @relation(fields: [studentId], references: [id])
+  courseId      String
+  course        Course        @relation(fields: [courseId], references: [id])
+  createdAt     DateTime      @default(now())
+}
+
+model Certificate {
+  id              String   @id @default(uuid())
+  certificateCode String   @unique
+  qrCodeUrl       String?
+  issuedAt        DateTime @default(now())
+  studentId       String
+  student         User     @relation(fields: [studentId], references: [id])
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id])
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  title       String
+  category    String
+  description String
+  budget      Float
+  deadline    DateTime
+  status      JobStatus @default(POSTED)
+  employerId  String
+  employer    User      @relation("EmployerJobs", fields: [employerId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  proposals   Proposal[]
+  submissions WorkSubmission[]
+  reviews     Review[]
+}
+
+model Proposal {
+  id            String         @id @default(uuid())
+  coverLetter   String
+  proposedCost  Float
+  estimatedDays Int
+  status        ProposalStatus @default(PENDING)
+  jobId         String
+  job           Job            @relation(fields: [jobId], references: [id])
+  freelancerId  String
+  freelancer    User           @relation("FreelancerProposals", fields: [freelancerId], references: [id])
+  createdAt     DateTime       @default(now())
+}
+
+model WorkSubmission {
+  id            String   @id @default(uuid())
+  deliverableUrl String
+  notes         String?
+  jobId         String
+  job           Job      @relation(fields: [jobId], references: [id])
+  freelancerId  String
+  freelancer    User     @relation("FreelancerSubmissions", fields: [freelancerId], references: [id])
+  submittedAt   DateTime @default(now())
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Float
+  comment     String?
+  courseId    String?
+  course      Course?  @relation(fields: [courseId], references: [id])
+  jobId       String?
+  job         Job?     @relation(fields: [jobId], references: [id])
+  reviewerId  String
+  reviewer    User     @relation("Reviewer", fields: [reviewerId], references: [id])
+  revieweeId  String?
+  reviewee    User?    @relation("Reviewee", fields: [revieweeId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model VerificationRequest {
+  id          String             @id @default(uuid())
+  type        String             // E.g. TEACHER_CV, FREELANCER_ID, EMPLOYER_REG
+  documentUrl String
+  status      VerificationStatus @default(PENDING)
+  userId      String
+  user        User               @relation(fields: [userId], references: [id])
+  createdAt   DateTime           @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}

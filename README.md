@@ -1,66 +1,101 @@
-# Dream More Platform - AppWorks Freelance Marketplace Module
+# Dream More Platform
 
-AppWorks connects skilled Ethiopian graduates with employers. It combines freelance work contracts, job posting, proposal submissions, and LMS verified skill badges.
-
----
-
-## Technical Stack
-- **Frontend:** React 19, Vite, Tailwind CSS, Lucide Icons, Axios
-- **Backend API:** Pure PHP 8.3 REST API with JSON responses
-- **Database:** MySQL 8
+**Dream More Platform** is an integrated education and career development ecosystem that combines an online **Learning Management System (LMS)** with the **AppWorks Freelance Marketplace**. The platform enables students to learn skills through courses, instructors to create and sell courses, and graduates/freelancers to find work opportunities based on acquired skills and verified experience.
 
 ---
 
-## Directory Structure
-```
+## 🚀 Technology Stack (Revised Architecture - August 2026)
+
+| Layer | Selected Technology |
+| :--- | :--- |
+| **Monorepo** | npm Workspaces (`apps/*`, `packages/*`) |
+| **Frontend** | **Next.js 16** + **TypeScript** |
+| **UI Styling** | **Tailwind CSS** + **Lucide React** + **Recharts** |
+| **State & Fetching** | **TanStack Query** (Server State) + **Zustand** (Client State) |
+| **Forms & Validation** | **React Hook Form** + **Zod** |
+| **Backend API** | **NestJS** + **TypeScript** |
+| **API Protocol** | **REST API** + **WebSockets / Socket.IO** (Real-time notifications) |
+| **Authentication** | **JWT** + Refresh Tokens + Passport |
+| **Database** | **PostgreSQL** |
+| **ORM** | **Prisma ORM** |
+| **Shared Contracts** | `@dream-more/shared` (TypeScript Types, Zod Schemas, Enums) |
+
+---
+
+## 📁 Repository Structure
+
+```text
 Dream_More/
-├── api/                        # Pure PHP REST API Endpoints
-│   ├── config/database.php      # PDO MySQL Connection
-│   └── appworks/
-│       ├── get_jobs.php         # Fetch & filter jobs
-│       ├── create_job.php       # Employer posts a job
-│       ├── submit_proposal.php  # Freelancer applies
-│       ├── get_proposals.php   # View proposals
-│       └── update_proposal.php # Accept / Reject proposal
-├── database/
-│   └── schema.sql              # MySQL Tables & Seed Data
-├── src/                        # React 19 Frontend
-│   ├── components/
-│   │   ├── Navbar.jsx
-│   │   ├── JobMarketplace.jsx
-│   │   ├── EmployerDashboard.jsx
-│   │   ├── FreelancerDashboard.jsx
-│   │   ├── PostJobModal.jsx
-│   │   ├── SubmitProposalModal.jsx
-│   │   └── JobDetailsModal.jsx
-│   ├── services/
-│   │   └── api.js              # Axios Client & Offline Fallback Engine
-│   ├── App.jsx
-│   ├── index.css
-│   └── main.jsx
-├── package.json
-└── vite.config.js
+├── apps/
+│   ├── web/                        # Next.js 16 Frontend
+│   │   ├── app/                    # Next.js App Router (pages & layouts)
+│   │   ├── components/             # Reusable UI components
+│   │   ├── features/               # Domain feature modules (LMS, Jobs, Payments)
+│   │   ├── lib/                    # API client & helpers
+│   │   └── stores/                 # Zustand state management
+│   │
+│   └── api/                        # NestJS Backend API
+│       ├── prisma/                 # Prisma schema & migrations
+│       └── src/
+│           ├── main.ts             # API entry point (Port 4000)
+│           └── modules/            # Domain modules (auth, users, courses,
+│                                   # payments, jobs, proposals, certificates...)
+│
+├── packages/
+│   └── shared/                     # @dream-more/shared package
+│       └── src/
+│           ├── enums/              # UserRole, PaymentStatus, JobStatus...
+│           ├── schemas/            # Zod validation schemas
+│           └── types/              # System-wide TypeScript interfaces
+│
+├── documentation.pdf               # Revised Software Requirements Specification
+├── package.json                    # Root monorepo workspace configuration
+└── README.md
 ```
 
 ---
 
-## How to Run Locally
+## 🗄️ Database Design (Prisma Entities)
 
-### 1. Frontend Development (React)
+The database schema defined in `apps/api/prisma/schema.prisma` includes **20 core entities**:
+
+- **Identity & Profiles**: `User`, `StudentProfile`, `TeacherProfile`, `EmployerProfile`, `FreelancerProfile`, `VerificationRequest`
+- **LMS Module**: `Course`, `CourseSection`, `Lesson`, `LessonResource`, `Quiz`, `QuizQuestion`, `QuizAttempt`, `Enrollment`
+- **Payment & Certificates**: `Payment` (screenshot-based verification), `Certificate` (unique ID + QR Code)
+- **AppWorks Marketplace**: `Job`, `Proposal`, `WorkSubmission`, `Review`
+- **Notifications**: `Notification`
+
+---
+
+## 🛠️ How to Run Locally
+
+### 1. Prerequisites
+Ensure you have **Node.js** (v18+ or v20+) installed.
+
+### 2. Launch Next.js Frontend
 ```bash
-npm install
-npm run dev
+npm run dev:web
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Access the application at `http://localhost:3000`.
 
-### 2. Backend REST API (PHP)
-Ensure WAMP / Apache server is running, or place the `api/` directory under your local PHP server (`http://localhost:8000/api/appworks/` or WAMP `http://localhost/Dream_More/api/appworks/`).
+### 3. Launch NestJS Backend API
+```bash
+npm run dev:api
+```
+The API server runs at `http://localhost:4000/api`.
 
-### 3. Database Setup (MySQL)
-Import `database/schema.sql` into phpMyAdmin or MySQL server to create `dreammore_db`.
+### 4. Prisma Database Tooling
+- **Generate Prisma Client:**
+  ```bash
+  npm run db:generate
+  ```
+- **Open Prisma Studio (Database GUI):**
+  ```bash
+  npm run db:studio
+  ```
 
 ---
 
-## Git Workflow & GitHub
-This repository is configured for push to:
-`https://github.com/tilahunm12/appworks-temp.git`
+## 📶 Offline Development
+
+All dependencies (Next.js, NestJS, Prisma, React, Zustand, TanStack Query, Zod, Tailwind, Lucide Icons) are pre-downloaded into `node_modules`. You can run and build the codebase completely offline without requiring internet data!

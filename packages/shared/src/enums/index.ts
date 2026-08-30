@@ -1,0 +1,41 @@
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  STUDENT = 'STUDENT',
+  TEACHER = 'TEACHER',
+  EMPLOYER = 'EMPLOYER',
+  FREELANCER = 'FREELANCER',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export enum JobStatus {
+  POSTED = 'POSTED',
+  ACTIVE = 'ACTIVE',
+  SUBMITTED = 'SUBMITTED',
+  COMPLETED = 'COMPLETED',
+  REJECTED = 'REJECTED',
+  DISPUTED = 'DISPUTED',
+}
+
+export enum ProposalStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+}
+
+export enum VerificationStatus {
+  PENDING = 'PENDING',
+  VERIFIED = 'VERIFIED',
+  REJECTED = 'REJECTED',
+}
+
+export enum CourseStatus {
+  DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  PUBLISHED = 'PUBLISHED',
+  REJECTED = 'REJECTED',
+}

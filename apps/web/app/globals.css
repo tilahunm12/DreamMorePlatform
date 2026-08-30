@@ -1,0 +1,25 @@
+/* Tailwind CSS መሰረታዊ ክፍሎችን ማስገባት */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ለጠቅላላው ድረ-ገጽ የሚሆኑ ዋና ተለዋዋጭ ቀለማት (Global Theme Variables) */
+:root {
+  /* የጀርባ ቀለም - የሎጎው ጥልቅ ሰማያዊ (Deep Navy) */
+  --background: #0c0f24;
+  /* የጽሁፍ ቀለም - ንጹህ ነጭ / ፈዛዛ ግራጫ */
+  --foreground: #f8fafc;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ጽሁፍ ሲመረጥ (Text Selection) የሚታይበት ውብ ብርቱካናማ ቀለም */
+::selection {
+  background-color: #f37021;
+  color: #ffffff;
+}
