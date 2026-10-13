@@ -71,6 +71,26 @@ export default function DashboardLayout({
       ];
     }
 
+    if (user.role === 'EMPLOYER') {
+      return [
+        {
+          title: '🏢 የአሰሪ ዳሽቦርድ (Employer)',
+          href: '/dashboard/employer',
+          icon: Briefcase,
+        },
+      ];
+    }
+
+    if (user.role === 'FREELANCER') {
+      return [
+        {
+          title: '💼 የፍሪላንሰር ዳሽቦርድ (Freelancer)',
+          href: '/dashboard/freelancer',
+          icon: Briefcase,
+        },
+      ];
+    }
+
     // STUDENT
     return [
       {
@@ -210,13 +230,31 @@ export default function DashboardLayout({
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Link
-                href="/courses"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-500/10 text-brand-400 border border-brand-500/20 hover:bg-brand-500 hover:text-white transition-colors"
-              >
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span>አዲስ ኮርስ ውሰድ</span>
-              </Link>
+              {user?.role === 'EMPLOYER' ? (
+                <Link
+                  href="/dashboard/employer"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-500/10 text-brand-400 border border-brand-500/20 hover:bg-brand-500 hover:text-white transition-colors"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span>አዲስ ስራ ይለጥፉ</span>
+                </Link>
+              ) : user?.role === 'TEACHER' ? (
+                <Link
+                  href="/dashboard/teacher"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-500/10 text-brand-400 border border-brand-500/20 hover:bg-brand-500 hover:text-white transition-colors"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span>አዲስ ኮርስ ፍጠር</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/courses"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-500/10 text-brand-400 border border-brand-500/20 hover:bg-brand-500 hover:text-white transition-colors"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  <span>አዲስ ኮርስ ውሰድ</span>
+                </Link>
+              )}
             </div>
           </div>
         </header>

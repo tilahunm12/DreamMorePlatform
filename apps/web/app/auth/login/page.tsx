@@ -22,6 +22,7 @@ import { UserRole } from '@dream-more/shared';
 
 import { apiClient } from '../../../lib/api-client';
 import Script from 'next/script';
+import { getRoleDashboardPath } from '../../../lib/navigation';
 
 /**
  * LoginPage - የተጠቃሚዎች መግቢያ ገጽ
@@ -66,13 +67,7 @@ export default function LoginPage() {
       setSuccessMessage(message || 'በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመሄድ ላይ...');
 
       setTimeout(() => {
-        if (loggedInUser.role === UserRole.ADMIN) {
-          router.push('/dashboard/admin');
-        } else if (loggedInUser.role === UserRole.TEACHER) {
-          router.push('/dashboard/teacher');
-        } else {
-          router.push('/dashboard/student');
-        }
+        router.push(getRoleDashboardPath(loggedInUser.role));
       }, 1000);
     } catch (err: any) {
       setLoading(false);
@@ -114,13 +109,7 @@ export default function LoginPage() {
                 setSuccessMessage(message || `በ Google (${profile.email}) በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመሄድ ላይ...`);
 
                 setTimeout(() => {
-                  if (loggedInUser.role === UserRole.ADMIN) {
-                    router.push('/dashboard/admin');
-                  } else if (loggedInUser.role === UserRole.TEACHER) {
-                    router.push('/dashboard/teacher');
-                  } else {
-                    router.push('/dashboard/student');
-                  }
+                  router.push(getRoleDashboardPath(loggedInUser.role));
                 }, 1000);
               } catch (apiErr: any) {
                 setGoogleLoading(false);

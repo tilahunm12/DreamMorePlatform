@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { UserRole } from '@dream-more/shared';
+import { getRoleDashboardPath, getRoleLabel } from '../../../lib/navigation';
 import { COURSES_DATA } from '../../../lib/coursesData';
 
 /**
@@ -82,14 +83,14 @@ export default function TeacherDashboardPage() {
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-white">ይህ ገጽ የተፈቀደው ለመምህራን ብቻ ነው!</h2>
           <p className="text-xs sm:text-sm text-slate-400">
-            እርስዎ የገቡት በተማሪ መለያ ስለሆነ ወደ ተማሪ ዳሽቦርድዎ ይሂዱ።
+            እርስዎ የገቡት በ{getRoleLabel(user.role)} ሚና ስለሆነ ወደ ራስዎ ዳሽቦርድ ይሂዱ።
           </p>
         </div>
         <Link
-          href="/dashboard/student"
+          href={getRoleDashboardPath(user.role)}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
         >
-          <span>ወደ ተማሪ ዳሽቦርድ ይሂዱ</span>
+          <span>ወደ ራስዎ ዳሽቦርድ ይሂዱ</span>
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

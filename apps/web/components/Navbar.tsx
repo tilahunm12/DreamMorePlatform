@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { UserRole } from '@dream-more/shared';
+import { getRoleDashboardPath, getRoleLabel } from '../lib/navigation';
 
 /**
  * Navbar Component (ከላይ የሚቀመጥ ቋሚ ማውጫ)
@@ -34,10 +35,7 @@ export default function Navbar() {
   }, []);
 
   const getDashboardLink = () => {
-    if (!user) return '/dashboard/student';
-    if (user.role === UserRole.ADMIN) return '/dashboard/admin';
-    if (user.role === UserRole.TEACHER) return '/dashboard/teacher';
-    return '/dashboard/student';
+    return getRoleDashboardPath(user?.role);
   };
 
   return (
@@ -100,7 +98,15 @@ export default function Navbar() {
               >
                 <LayoutDashboard className="h-4 w-4" />
                 <span>
-                  {user.role === UserRole.ADMIN ? '🛡️ አድሚን ዳሽቦርድ' : user.role === UserRole.TEACHER ? '👨‍🏫 መምህር ዳሽቦርድ' : '🎓 ተማሪ ዳሽቦርድ'}
+                  {user.role === UserRole.ADMIN
+                    ? '🛡️ አድሚን ዳሽቦርድ'
+                    : user.role === UserRole.TEACHER
+                    ? '👨‍🏫 መምህር ዳሽቦርድ'
+                    : user.role === UserRole.EMPLOYER
+                    ? '🏢 አሰሪ ዳሽቦርድ'
+                    : user.role === UserRole.FREELANCER
+                    ? '💼 ፍሪላንሰር ዳሽቦርድ'
+                    : '🎓 ተማሪ ዳሽቦርድ'}
                 </span>
               </Link>
               <button

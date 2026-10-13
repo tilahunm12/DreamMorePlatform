@@ -10,6 +10,7 @@ import { UserRole } from '@dream-more/shared';
 import { apiClient } from '../../../lib/api-client';
 import Script from 'next/script';
 import { useAuthStore } from '../../../stores/useAuthStore';
+import { getRoleDashboardPath } from '../../../lib/navigation';
 import { 
   GraduationCap, 
   BookOpen, 
@@ -167,13 +168,7 @@ export default function RegisterPage() {
                 setSuccessMessage(message || `በ Google (${profile.email}) በተሳካ ሁኔታ ተመዝግበዋል! ወደ ዳሽቦርድ በመሄድ ላይ...`);
 
                 setTimeout(() => {
-                  if (loggedInUser.role === UserRole.TEACHER) {
-                    router.push('/dashboard/teacher');
-                  } else if (loggedInUser.role === UserRole.ADMIN) {
-                    router.push('/dashboard/admin');
-                  } else {
-                    router.push('/dashboard/student');
-                  }
+                  router.push(getRoleDashboardPath(loggedInUser.role));
                 }, 1200);
               } catch (apiErr: any) {
                 setGoogleLoading(false);

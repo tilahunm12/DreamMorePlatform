@@ -28,6 +28,7 @@ import {
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { UserRole } from '@dream-more/shared';
 import { apiClient } from '../../../lib/api-client';
+import { getRoleDashboardPath } from '../../../lib/navigation';
 
 /**
  * AdminDashboardPage - የአድሚን ዋና መቆጣጠሪያ ዳሽቦርድ (Admin Portal)
@@ -146,13 +147,23 @@ export default function AdminDashboardPage() {
             ወደ አድሚን መቆጣጠሪያ ዳሽቦርድ ለመግባት በዋና አስተዳዳሪ (Admin) መለያ መግባት አለብዎት።
           </p>
         </div>
-        <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
-        >
-          <span>እንደ አድሚን ይግቡ (Admin Login)</span>
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        {user ? (
+          <Link
+            href={getRoleDashboardPath(user.role)}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
+          >
+            <span>ወደ ራስዎ ዳሽቦርድ ይሂዱ</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        ) : (
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
+          >
+            <span>እንደ አድሚን ይግቡ (Admin Login)</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        )}
       </div>
     );
   }
