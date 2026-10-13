@@ -219,7 +219,7 @@ export default function StudentDashboardPage() {
 
               <div className="pt-2 flex justify-end">
                 <Link
-                  href={`/courses/${activeCourse.id}`}
+                  href={`/courses/${activeCourse.id}/learn`}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 transition-all"
                 >
                   <PlayCircle className="h-4 w-4" />

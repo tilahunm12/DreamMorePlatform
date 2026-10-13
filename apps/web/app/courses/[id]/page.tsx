@@ -182,13 +182,22 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             </div>
 
             {/* የመመዝገቢያ አዝራር */}
-            <button
-              onClick={() => setIsPaymentModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all hover:scale-[1.02]"
-            >
-              <ShieldCheck className="h-5 w-5" />
-              <span>አሁኑኑ ይመዝገቡ (Enroll Now)</span>
-            </button>
+            <div className="space-y-2">
+              <Link
+                href={`/courses/${course.id}/learn`}
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all hover:scale-[1.02]"
+              >
+                <PlayCircle className="h-5 w-5" />
+                <span>ትምህርቱን ጀምር (Start Learning)</span>
+              </Link>
+              <button
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-300 bg-navy-800 hover:bg-navy-700 border border-navy-700 transition-colors"
+              >
+                <ShieldCheck className="h-4 w-4 text-brand-400" />
+                <span>በቴሌብር / ባንክ ይክፈሉ (Enroll with Payment)</span>
+              </button>
+            </div>
 
             {/* የኮርሱ ጥቅሎች ዝርዝር */}
             <div className="space-y-2 pt-2 text-xs text-slate-300">
@@ -252,14 +261,18 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                   <div className="divide-y divide-navy-800/50">
                     {section.lessons.map((lesson) => (
-                      <div key={lesson.id} className="px-5 py-3 flex items-center justify-between text-xs hover:bg-navy-900/30 transition-colors">
+                      <Link
+                        key={lesson.id}
+                        href={`/courses/${course.id}/learn`}
+                        className="px-5 py-3 flex items-center justify-between text-xs hover:bg-navy-900/60 transition-colors block"
+                      >
                         <div className="flex items-center gap-2.5 text-slate-300">
                           {lesson.isFreePreview ? (
                             <PlayCircle className="h-4 w-4 text-brand-400" />
                           ) : (
                             <Lock className="h-4 w-4 text-slate-500" />
                           )}
-                          <span>{lesson.title}</span>
+                          <span className="hover:text-brand-400 transition-colors">{lesson.title}</span>
                           {lesson.isFreePreview && (
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-500/10 text-brand-400 border border-brand-500/20">
                               ነፃ ሙከራ
@@ -267,7 +280,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                           )}
                         </div>
                         <span className="text-slate-500">{lesson.duration}</span>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
