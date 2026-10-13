@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 
 /**
  * PaymentsService - የክፍያ ስክሪንሾት ማረጋገጫ የቢዝነስ ሎጂክ (Payment Verification Logic)
  */
 @Injectable()
 export class PaymentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   /**
    * 1. ተማሪው የከፈለበትን ደረሰኝ ማስገባት (Submit payment screenshot)
@@ -87,6 +91,22 @@ export class PaymentsService {
             courseId: updatedPayment.courseId,
           },
         });
+
+        // የተማሪውን እና የኮርሱን ዝርዝር በመውሰድ የማረጋገጫ ደረሰኝ ኢሜይል መላክ
+        this.prisma.payment.findUnique({
+          where: { id },
+          include: { student: true, course: true },
+        }).then((fullPayment) => {
+          if (fullPayment?.student?.email && fullPayment?.course?.title) {
+            this.mailService.sendPaymentApprovedEmail(
+              fullPayment.student.email,
+              fullPayment.student.name,
+              fullPayment.course.title,
+              `${fullPayment.amount} ETB`,
+              fullPayment.transactionId,
+            ).catch((e) => console.error('Failed to send payment approval email:', e));
+          }
+        }).catch((e) => console.error('Failed to query payment details for email:', e));
       }
 
       return {

@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { UserRole } from '@dream-more/shared';
+import { MailService } from '../mail/mail.service';
 
 /**
  * AuthService - የተጠቃሚዎች ምዝገባ፣ መግቢያ እና የይለፍ ቃል ማመስጠር አገልግሎት (Auth Business Logic)
@@ -13,6 +14,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -58,7 +60,10 @@ export class AuthService {
         },
       });
 
-      console.log(`📧 [EMAIL SERVICE] Welcome and verification email dispatched to: ${user.email}`);
+      // 5. የDream More ብራንድ የእንኳን ደህና መጡ ኢሜይል መላክ
+      this.mailService.sendWelcomeEmail(user.email, user.name, user.role).catch((err) => {
+        console.error('Failed to send welcome email:', err);
+      });
 
       // 5. JWT Token ማመንጨት
       const token = this.generateJwtToken(user.id, user.email, user.role);
@@ -199,7 +204,10 @@ export class AuthService {
           },
         });
 
-        console.log(`📧 [GOOGLE SIGN-IN] New user registered via Google: ${user.email}`);
+        // የDream More ብራንድ የእንኳን ደህና መጡ ኢሜይል መላክ
+        this.mailService.sendWelcomeEmail(user.email, user.name, user.role).catch((err) => {
+          console.error('Failed to send Google welcome email:', err);
+        });
       }
 
       const token = this.generateJwtToken(user.id, user.email, user.role);

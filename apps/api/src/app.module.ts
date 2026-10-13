@@ -6,6 +6,7 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { CertificatesModule } from './modules/certificates/certificates.module';
+import { MailModule } from './modules/mail/mail.module';
 
 /**
  * AppModule - የ NestJS Backend API ዋና ማዕከል (Root Module)
@@ -29,6 +30,8 @@ import { CertificatesModule } from './modules/certificates/certificates.module';
     JobsModule,
     // 7. የሰርተፊኬት ማረጋገጫ (Certificates)
     CertificatesModule,
+    // 8. የኢሜይል ማሳወቂያዎች (Mail Service)
+    MailModule,
   ],
   controllers: [],
   providers: [],
