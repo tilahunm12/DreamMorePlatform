@@ -144,22 +144,29 @@ export default function DashboardLayout({
 
         {/* የተጠቃሚ ፕሮፋይል ማጠቃለያ */}
         <div className="pt-4 border-t border-navy-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-              DM
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="h-8 w-8 rounded-full bg-brand-500 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs shadow-sm uppercase">
+              {user?.name ? user.name.slice(0, 2) : 'DM'}
             </div>
-            <div>
-              <span className="text-xs font-bold text-white block">ሙከራ ተጠቃሚ</span>
-              <span className="text-[10px] text-slate-400">demo@dreammore.com</span>
+            <div className="truncate">
+              <span className="text-xs font-bold text-white block truncate">
+                {user?.name || 'ተጠቃሚ'}
+              </span>
+              <span className="text-[10px] text-slate-400 block truncate">
+                {user?.email || 'user@dreammore.com'}
+              </span>
             </div>
           </div>
-          <Link
-            href="/auth/login"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-navy-800 transition-colors"
-            title="ይውጡ"
+          <button
+            onClick={() => {
+              logout();
+              window.location.href = '/auth/login';
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-navy-800 transition-colors flex-shrink-0"
+            title="ይውጡ (Logout)"
           >
             <LogOut className="h-4 w-4" />
-          </Link>
+          </button>
         </div>
 
       </aside>

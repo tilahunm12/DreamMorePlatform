@@ -1,7 +1,7 @@
 'use client';
 
 // React እና Next.js አስፈላጊ የሆኑ ሞጁሎችን ማስገባት
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 // ለገጹ ውበት የሚረዱ አይከኖችን (Icons) ማስገባት
@@ -12,16 +12,33 @@ import {
   Menu, 
   X, 
   LogIn, 
-  UserPlus 
+  UserPlus,
+  LayoutDashboard,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
+import { useAuthStore } from '../stores/useAuthStore';
+import { UserRole } from '@dream-more/shared';
 
 /**
  * Navbar Component (ከላይ የሚቀመጥ ቋሚ ማውጫ)
- * የድርጅቱን ሎጎ፣ የገጽ ማውጫዎችን እና የይግቡ/ይመዝገቡ አዝራሮችን የያዘ ነው።
+ * የድርጅቱን ሎጎ፣ የገጽ ማውጫዎችን እና የይግቡ/ይመዝገቡ ወይም የዳሽቦርድ አዝራሮችን የያዘ ነው።
  */
 export default function Navbar() {
-  // በስልክ ስክሪን ላይ የሚከፈተውን ማውጫ ሁኔታ (Open/Close) ለመቆጣጠር የሚረዳ State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const getDashboardLink = () => {
+    if (!user) return '/dashboard/student';
+    if (user.role === UserRole.ADMIN) return '/dashboard/admin';
+    if (user.role === UserRole.TEACHER) return '/dashboard/teacher';
+    return '/dashboard/student';
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-navy-800/80 bg-navy-950/90 backdrop-blur-md">
@@ -73,22 +90,48 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        {/* የመግቢያ እና የመመዝገቢያ አዝራሮች (Action Buttons) */}
+        {/* የመግቢያ እና የመመዝገቢያ ወይም የዳሽቦርድ አዝራሮች (Action Buttons) */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:text-white rounded-lg hover:bg-navy-800 transition-colors"
-          >
-            <LogIn className="h-4 w-4" />
-            ይግቡ (Login)
-          </Link>
-          <Link
-            href="/auth/register"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all hover:scale-[1.02]"
-          >
-            <UserPlus className="h-4 w-4" />
-            ይመዝገቡ (Sign Up)
-          </Link>
+          {mounted && user ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href={getDashboardLink()}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-md shadow-brand-500/20 transition-all hover:scale-105"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                <span>
+                  {user.role === UserRole.ADMIN ? '🛡️ አድሚን ዳሽቦርድ' : user.role === UserRole.TEACHER ? '👨‍🏫 መምህር ዳሽቦርድ' : '🎓 ተማሪ ዳሽቦርድ'}
+                </span>
+              </Link>
+              <button
+                onClick={() => {
+                  logout();
+                  window.location.href = '/';
+                }}
+                className="p-2 text-slate-400 hover:text-red-400 hover:bg-navy-800 rounded-xl transition-colors"
+                title="ይውጡ (Logout)"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:text-white rounded-lg hover:bg-navy-800 transition-colors"
+              >
+                <LogIn className="h-4 w-4" />
+                ይግቡ (Login)
+              </Link>
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all hover:scale-[1.02]"
+              >
+                <UserPlus className="h-4 w-4" />
+                ይመዝገቡ (Sign Up)
+              </Link>
+            </>
+          )}
         </div>
 
         {/* ለስልክ ስክሪን የሚሆን የማውጫ መክፈቻ ቁልፍ (Mobile Menu Button) */}
@@ -138,22 +181,48 @@ export default function Navbar() {
           </div>
 
           <div className="pt-4 border-t border-navy-800 flex flex-col gap-2.5">
-            <Link
-              href="/auth/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-slate-200 bg-navy-800 hover:bg-navy-700 transition-colors"
-            >
-              <LogIn className="h-4 w-4" />
-              ይግቡ (Login)
-            </Link>
-            <Link
-              href="/auth/register"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 transition-colors"
-            >
-              <UserPlus className="h-4 w-4" />
-              ይመዝገቡ (Sign Up)
-            </Link>
+            {mounted && user ? (
+              <>
+                <Link
+                  href={getDashboardLink()}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  ዳሽቦርድ ({user.role})
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                    window.location.href = '/';
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-red-400 bg-navy-800 hover:bg-navy-700 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  ይውጡ (Logout)
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-slate-200 bg-navy-800 hover:bg-navy-700 transition-colors"
+                >
+                  <LogIn className="h-4 w-4" />
+                  ይግቡ (Login)
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 transition-colors"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  ይመዝገቡ (Sign Up)
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

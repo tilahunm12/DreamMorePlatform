@@ -65,3 +65,28 @@ You can now unplug your internet and work fully **OFFLINE**!
 
 - **To view/edit Database Schema & Prisma**:
   Inspect/edit `apps/api/prisma/schema.prisma`.
+
+---
+
+## 🔒 Security, Reliability & Production-Readiness Upgrades
+
+1. **Database Synchronization (Neon PostgreSQL)**:
+   - Configured root `.env` with Neon connection string.
+   - Pushed all 20+ Prisma models cleanly to PostgreSQL.
+   - Seeded real initial accounts in DB:
+     - **Admin**: `admin@dreammore.com` (Bcrypt hashed password: `AdminPassword123!`)
+     - **Teacher**: `teacher@dreammore.com` (`TeacherPassword123!`)
+     - **Student**: `student@dreammore.com` (`StudentPassword123!`)
+     - Real demo course and pending Telebirr payment (`FT2408912345`).
+
+2. **Persistent Authentication & Bearer Tokens**:
+   - Upgraded [useAuthStore.ts](file:///c:/wamp64/www/Dream_More/apps/web/stores/useAuthStore.ts) with Zustand `persist` middleware storing auth state safely in `localStorage`.
+   - Configured [api-client.ts](file:///c:/wamp64/www/Dream_More/apps/web/lib/api-client.ts) request interceptor to automatically attach `Authorization: Bearer <token>` to all API calls.
+   - Connected [LoginPage](file:///c:/wamp64/www/Dream_More/apps/web/app/auth/login/page.tsx) and [RegisterPage](file:///c:/wamp64/www/Dream_More/apps/web/app/auth/register/page.tsx) directly to NestJS `/api/auth/login` and `/api/auth/register`.
+
+3. **Admin Route Protection (Security Guard)**:
+   - Protected [apps/web/app/dashboard/admin/page.tsx](file:///c:/wamp64/www/Dream_More/apps/web/app/dashboard/admin/page.tsx) with a role guard: unauthenticated users and non-admin roles receive an **Access Denied (የተቆለፈ ገጽ)** screen with a redirect to Admin Login.
+   - Connected Admin Dashboard to real backend API endpoints:
+     - `GET /api/payments/pending` for fetching live payment queue.
+     - `PATCH /api/payments/:id/status` for persistent approve/reject decisions.
+   - Updated [Navbar.tsx](file:///c:/wamp64/www/Dream_More/apps/web/components/Navbar.tsx) and [DashboardLayout.tsx](file:///c:/wamp64/www/Dream_More/apps/web/app/dashboard/layout.tsx) with dynamic user profile and functional Logout button.

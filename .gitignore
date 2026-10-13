@@ -6,6 +6,9 @@
 # Production output
 /dist
 /build
+.next/
+apps/web/.next/
+.dist/
 
 # Local environment & IDE
 .DS_Store

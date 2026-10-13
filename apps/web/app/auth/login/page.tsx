@@ -20,6 +20,8 @@ import {
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { UserRole } from '@dream-more/shared';
 
+import { apiClient } from '../../../lib/api-client';
+
 /**
  * LoginPage - የተጠቃሚዎች መግቢያ ገጽ
  * ተማሪዎች፣ መምህራን፣ አድሚኖች እና ቀጣሪዎች ኢሜይልና የይለፍ ቃል አስገብተው የሚገቡበት ገጽ ነው።
@@ -40,7 +42,7 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // የመግቢያ ቁልፉ ሲጫን የሚሰራው ተግባር (Submit Handler)
+  // የመግቢያ ቁልፉ ሲጫን የሚሰራው ተግባር (Submit Handler via Real API)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
@@ -48,44 +50,39 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ለሙከራ የሚሆን የመግቢያ ሂደት (Mock login)
+      const response = await apiClient.post('/auth/login', {
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      const { user: loggedInUser, token, message } = response.data;
+
+      // መረጃውን በ Zustand Persistent State ውስጥ እናስቀምጣለን
+      setUser(loggedInUser);
+      setToken(token);
+      setLoading(false);
+      setSuccessMessage(message || 'በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመሄድ ላይ...');
+
       setTimeout(() => {
-        setLoading(false);
-        // መረጃውን በ Zustand State ውስጥ እናስቀምጣለን
-        setUser({
-          id: 'user_123',
-          email: email,
-          name: email.split('@')[0] || 'User',
-          role: email.includes('admin') 
-            ? UserRole.ADMIN 
-            : email.includes('teacher') 
-            ? UserRole.TEACHER 
-            : email.includes('employer')
-            ? UserRole.EMPLOYER
-            : email.includes('freelancer')
-            ? UserRole.FREELANCER
-            : UserRole.STUDENT,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        } as any);
-
-        setToken('mock_jwt_token_123456');
-        setSuccessMessage('በተሳካ ሁኔታ ገብተዋል! ወደ ዳሽቦርድ በመሄድ ላይ...');
-
-        setTimeout(() => {
-          router.push('/');
-        }, 1200);
+        if (loggedInUser.role === UserRole.ADMIN) {
+          router.push('/dashboard/admin');
+        } else if (loggedInUser.role === UserRole.TEACHER) {
+          router.push('/dashboard/teacher');
+        } else {
+          router.push('/dashboard/student');
+        }
       }, 1000);
     } catch (err: any) {
       setLoading(false);
-      setErrorMessage('የገቡት ኢሜይል ወይም የይለፍ ቃል ትክክል አይደለም።');
+      const apiError = err.response?.data?.message || 'የገቡት ኢሜይል ወይም የይለፍ ቃል ትክክል አይደለም።';
+      setErrorMessage(Array.isArray(apiError) ? apiError.join(', ') : apiError);
     }
   };
 
-  // ለሙከራ በፍጥነት ለመግባት የሚረዱ ፈጣን ቁልፎች (Quick Test Logins)
-  const handleQuickLogin = (role: string, demoEmail: string) => {
+  // ለሙከራ በፍጥነት ለመግባት የሚረዱ ፈጣን ቁልፎች (Quick Test Logins with seeded credentials)
+  const handleQuickLogin = (role: string, demoEmail: string, demoPass: string) => {
     setEmail(demoEmail);
-    setPassword('password123');
+    setPassword(demoPass);
   };
 
   return (
@@ -207,28 +204,28 @@ export default function LoginPage() {
           <div className="grid grid-cols-2 gap-2 text-xs">
             <button
               type="button"
-              onClick={() => handleQuickLogin('Student', 'student@dreammore.com')}
+              onClick={() => handleQuickLogin('Student', 'student@dreammore.com', 'StudentPassword123!')}
               className="px-2.5 py-1.5 rounded-lg bg-navy-950/80 border border-navy-800 text-slate-300 hover:text-brand-400 hover:border-brand-500/40 text-left transition-colors"
             >
               🎓 Student Demo
             </button>
             <button
               type="button"
-              onClick={() => handleQuickLogin('Teacher', 'teacher@dreammore.com')}
+              onClick={() => handleQuickLogin('Teacher', 'teacher@dreammore.com', 'TeacherPassword123!')}
               className="px-2.5 py-1.5 rounded-lg bg-navy-950/80 border border-navy-800 text-slate-300 hover:text-brand-400 hover:border-brand-500/40 text-left transition-colors"
             >
               👨‍🏫 Teacher Demo
             </button>
             <button
               type="button"
-              onClick={() => handleQuickLogin('Employer', 'employer@dreammore.com')}
+              onClick={() => handleQuickLogin('Employer', 'employer@dreammore.com', 'AdminPassword123!')}
               className="px-2.5 py-1.5 rounded-lg bg-navy-950/80 border border-navy-800 text-slate-300 hover:text-brand-400 hover:border-brand-500/40 text-left transition-colors"
             >
               💼 Employer Demo
             </button>
             <button
               type="button"
-              onClick={() => handleQuickLogin('Admin', 'admin@dreammore.com')}
+              onClick={() => handleQuickLogin('Admin', 'admin@dreammore.com', 'AdminPassword123!')}
               className="px-2.5 py-1.5 rounded-lg bg-navy-950/80 border border-navy-800 text-slate-300 hover:text-brand-400 hover:border-brand-500/40 text-left transition-colors"
             >
               🛡️ Admin Demo

@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { 
   UserRole 
 } from '@dream-more/shared';
+import { apiClient } from '../../../lib/api-client';
 import { 
   GraduationCap, 
   BookOpen, 
@@ -111,17 +112,22 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // ለሙከራ እና ለቀጣይ API ግንኙነት የሚሆን የዘገየ ዝግጅት
+      const response = await apiClient.post('/auth/register', {
+        name: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        role: selectedRole,
+      });
+
+      setLoading(false);
+      setSuccessMessage(response.data.message || 'ምዝገባዎ በተሳካ ሁኔታ ተጠናቋል! አሁን መግባት ይችላሉ።');
       setTimeout(() => {
-        setLoading(false);
-        setSuccessMessage('ምዝገባዎ በተሳካ ሁኔታ ተጠናቋል! አሁን መግባት ይችላሉ።');
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 1500);
-      }, 1000);
+        router.push('/auth/login');
+      }, 1500);
     } catch (err: any) {
       setLoading(false);
-      setErrorMessage('ምዝገባው አልተሳካም። እባክዎ እንደገና ይሞክሩ።');
+      const apiError = err.response?.data?.message || 'ምዝገባው አልተሳካም። እባክዎ እንደገና ይሞክሩ።';
+      setErrorMessage(Array.isArray(apiError) ? apiError.join(', ') : apiError);
     }
   };
 
