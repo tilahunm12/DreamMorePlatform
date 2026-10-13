@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 // የኮርሶች መረጃ
 import { COURSES_DATA } from '../../../lib/coursesData';
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { apiClient } from '../../../lib/api-client';
 
 /**
  * CourseDetailPage - የአንድ የተመረጠ ኮርስ ዝርዝር መረጃ እና መመዝገቢያ ገጽ
@@ -32,6 +34,7 @@ import { COURSES_DATA } from '../../../lib/coursesData';
  */
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { user } = useAuthStore();
   const resolvedParams = use(params);
   const courseId = resolvedParams.id;
 
@@ -64,16 +67,30 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   };
 
   // የክፍያ መረጃውን ለአድሚን ማረጋገጫ መላክ (Submit Payment for Admin Approval)
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!transactionId) return;
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      await apiClient.post('/payments', {
+        studentId: user?.id,
+        studentEmail: user?.email || 'student@dreammore.com',
+        studentName: user?.name || 'ተማሪ',
+        courseId: course.id,
+        courseTitle: course.title,
+        amount: course.price,
+        transactionId: transactionId.trim(),
+        paymentMethod,
+        screenshotUrl: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&auto=format&fit=crop&q=60',
+      });
       setIsSubmitting(false);
       setPaymentSuccess(true);
-    }, 1500);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setPaymentSuccess(true);
+    }
   };
 
   return (

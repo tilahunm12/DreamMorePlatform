@@ -13,6 +13,11 @@ import { PaymentsService } from './payments.service';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  @Post()
+  async submitPaymentRoot(@Body() body: any) {
+    return this.paymentsService.submitPayment(body);
+  }
+
   @Post('submit')
   async submitPayment(@Body() body: any) {
     return this.paymentsService.submitPayment(body);
