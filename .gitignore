@@ -4,8 +4,9 @@
 .pnp.js
 
 # Production output
-/dist
-/build
+dist/
+**/dist/
+build/
 .next/
 apps/web/.next/
 .dist/

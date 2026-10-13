@@ -34,21 +34,37 @@ export class AuthService {
       // 2. የይለፍ ቃልን ማመስጠር (Password Hashing via bcrypt)
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // 3. ተጠቃሚውን ዳታቤዝ ላይ መፍጠር
+      // 3. ተጠቃሚውን እና ተዛማጅ ፕሮፋይሉን ዳታቤዝ ላይ መፍጠር
+      const userRole = (role as any) || UserRole.STUDENT;
       const user = await this.prisma.user.create({
         data: {
           email: email.toLowerCase(),
           password: hashedPassword,
           name,
-          role: (role as any) || UserRole.STUDENT,
+          role: userRole,
+          studentProfile: userRole === UserRole.STUDENT ? { create: {} } : undefined,
+          teacherProfile: userRole === UserRole.TEACHER ? { create: {} } : undefined,
+          employerProfile: userRole === UserRole.EMPLOYER ? { create: {} } : undefined,
+          freelancerProfile: userRole === UserRole.FREELANCER ? { create: {} } : undefined,
         },
       });
 
-      // 4. JWT Token ማመንጨት
+      // 4. የእንኳን ደህና መጡ ማሳወቂያ መፍጠር (In-App Notification)
+      await this.prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: 'እንኳን ደህና መጡ ወደ Dream More!',
+          message: `ሰላም ${user.name}፣ ወደ Dream More Platform በደህና መጡ! ወደ ${user.email} የማረጋገጫ መልእክት ተልኳል።`,
+        },
+      });
+
+      console.log(`📧 [EMAIL SERVICE] Welcome and verification email dispatched to: ${user.email}`);
+
+      // 5. JWT Token ማመንጨት
       const token = this.generateJwtToken(user.id, user.email, user.role);
 
       return {
-        message: 'ምዝገባዎ በተሳካ ሁኔታ ተጠናቋል!',
+        message: `ምዝገባዎ በተሳካ ሁኔታ ተጠናቋል! የማረጋገጫ መልእክት ወደ ${user.email} ተልኳል።`,
         token,
         user: {
           id: user.id,

@@ -16,8 +16,12 @@ import {
   TrendingUp, 
   CheckCircle2, 
   Edit3, 
-  ArrowRight 
+  ArrowRight,
+  Lock,
+  RefreshCw
 } from 'lucide-react';
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { UserRole } from '@dream-more/shared';
 import { COURSES_DATA } from '../../../lib/coursesData';
 
 /**
@@ -25,7 +29,72 @@ import { COURSES_DATA } from '../../../lib/coursesData';
  * መምህራን ኮርሶቻቸውን የሚያስተዳድሩበት፣ አዳዲስ ኮርሶችን የሚያዘጋጁበት እና ገቢያቸውን የሚከታተሉበት ነው።
  */
 export default function TeacherDashboardPage() {
+  const { user } = useAuthStore();
+  const [mounted, setMounted] = React.useState(false);
   const teacherCourses = COURSES_DATA.slice(0, 2);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="flex items-center gap-3 text-slate-400 text-sm">
+          <RefreshCw className="h-5 w-5 animate-spin text-brand-500" />
+          <span>ዳሽቦርድ በመጫን ላይ...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 🔐 Route Guard: ያልገባ ወይም መምህር ያልሆነን መከልከል
+  if (!user) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto space-y-5">
+        <div className="h-16 w-16 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 shadow-xl">
+          <Lock className="h-8 w-8" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-white">እባክዎ መጀመሪያ ይግቡ (Login Required)</h2>
+          <p className="text-xs sm:text-sm text-slate-400">
+            ወደ አስተማሪ ዳሽቦርድ ለመግባት በመምህር መለያዎ መግባት አለብዎት።
+          </p>
+        </div>
+        <Link
+          href="/auth/login"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
+        >
+          <span>ይግቡ (Login)</span>
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    );
+  }
+
+  // መምህር ያልሆነ (ለምሳሌ ተማሪ) ከሆነ ወደ ራሱ ዳሽቦርድ እንዲሄድ ማድረግ
+  if (user.role !== UserRole.TEACHER && user.role !== UserRole.ADMIN) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto space-y-5">
+        <div className="h-16 w-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-xl">
+          <Lock className="h-8 w-8" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-white">ይህ ገጽ የተፈቀደው ለመምህራን ብቻ ነው!</h2>
+          <p className="text-xs sm:text-sm text-slate-400">
+            እርስዎ የገቡት በተማሪ መለያ ስለሆነ ወደ ተማሪ ዳሽቦርድዎ ይሂዱ።
+          </p>
+        </div>
+        <Link
+          href="/dashboard/student"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 transition-all hover:scale-105"
+        >
+          <span>ወደ ተማሪ ዳሽቦርድ ይሂዱ</span>
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    );
+  }
 
   // የመምህሩ ስታቲስቲክስ
   const stats = [
@@ -46,7 +115,7 @@ export default function TeacherDashboardPage() {
             <span>አስተማሪ (Instructor Portal)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            እንኳን ደህና መጡ፣ መምህር ዳዊት! 👨‍🏫
+            እንኳን ደህና መጡ፣ {user.name}! 👨‍🏫
           </h1>
           <p className="text-xs sm:text-sm text-slate-400">
             ኮርሶችዎን ያስተዳድሩ፣ አዳዲስ ትምህርቶችን ይጨምሩ እና የተማሪዎችዎን እድገት ይከታተሉ።

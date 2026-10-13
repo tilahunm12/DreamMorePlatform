@@ -39,27 +39,47 @@ export default function DashboardLayout({
   const { user, logout } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // የዳሽቦርድ ማውጫዎች ዝርዝር (Navigation Items)
-  const navItems = [
-    {
-      title: 'የተማሪ ዳሽቦርድ (Student)',
-      href: '/dashboard/student',
-      icon: GraduationCap,
-      badge: 'Student',
-    },
-    {
-      title: 'የአስተማሪ ዳሽቦርድ (Teacher)',
-      href: '/dashboard/teacher',
-      icon: BookOpen,
-      badge: 'Teacher',
-    },
-    {
-      title: 'የአድሚን ዳሽቦርድ (Admin)',
-      href: '/dashboard/admin',
-      icon: ShieldCheck,
-      badge: 'Admin',
-    },
-  ];
+  // በተጠቃሚው ሚና (Role) መሰረት ብቻ የሚታዩ ማውጫዎች
+  const navItems = React.useMemo(() => {
+    if (!user) {
+      return [
+        {
+          title: 'የተማሪ ዳሽቦርድ (Student)',
+          href: '/dashboard/student',
+          icon: GraduationCap,
+        },
+      ];
+    }
+
+    if (user.role === 'ADMIN') {
+      return [
+        {
+          title: '🛡️ የአድሚን መቆጣጠሪያ (Admin)',
+          href: '/dashboard/admin',
+          icon: ShieldCheck,
+        },
+      ];
+    }
+
+    if (user.role === 'TEACHER') {
+      return [
+        {
+          title: '👨‍🏫 የመምህር ዳሽቦርድ (Teacher)',
+          href: '/dashboard/teacher',
+          icon: BookOpen,
+        },
+      ];
+    }
+
+    // STUDENT
+    return [
+      {
+        title: '🎓 የተማሪ ዳሽቦርድ (Student)',
+        href: '/dashboard/student',
+        icon: GraduationCap,
+      },
+    ];
+  }, [user]);
 
   return (
     <div className="min-h-screen flex bg-navy-950 text-slate-100">
