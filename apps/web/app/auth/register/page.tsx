@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 // ለፎርም ውበትና መስተጋብር የሚረዱ አይከኖች
 import { UserRole } from '@dream-more/shared';
 import { apiClient } from '../../../lib/api-client';
+import Script from 'next/script';
+import { useAuthStore } from '../../../stores/useAuthStore';
 import { 
   GraduationCap, 
   BookOpen, 
@@ -28,10 +30,11 @@ import {
 
 /**
  * RegisterPage - የተጠቃሚዎች መመዝገቢያ ገጽ (Udemy-Style Professional UI)
- * ተማሪዎች፣ መምህራን፣ አሰሪዎች እና ፍሪላንሰሮች በኢሜይል ወይም በ Social Login የሚመዘገቡበት ነው።
+ * ተማሪዎች፣ መምህራን፣ አሰሪዎች እና ፍሪላንሰሮች በኢሜይል ወይም በ Google OAuth የሚመዘገቡበት ነው።
  */
 export default function RegisterPage() {
   const router = useRouter();
+  const { setUser, setToken } = useAuthStore();
 
   // 1. የተመረጠው ሚና (Role State)
   const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.STUDENT);
@@ -50,6 +53,7 @@ export default function RegisterPage() {
   
   // 4. ሁኔታዎች (Loading እና Error State)
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -128,7 +132,75 @@ export default function RegisterPage() {
     }
   };
 
-  // Social Login Mock Handler (Google, Facebook, Apple)
+  // 🌐 Google OAuth 2.0 Sign-In Handler (Choose an Account Modal)
+  const handleGoogleSignup = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '809670747488-ellf0kkijkc9o9q4nojf50hg7ie7bhej.apps.googleusercontent.com';
+
+    if (typeof window !== 'undefined' && (window as any).google?.accounts?.oauth2) {
+      setGoogleLoading(true);
+      setErrorMessage('');
+      try {
+        const tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'email profile openid',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              try {
+                // የጎግል ተጠቃሚውን መረጃ ማምጣት (Fetch user info from Google)
+                const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const profile = await googleRes.json();
+
+                // የBackend API በመጥራት ተጠቃሚውን መመዝገብ/ማስገባት
+                const response = await apiClient.post('/auth/google', {
+                  email: profile.email,
+                  name: profile.name,
+                  avatarUrl: profile.picture,
+                  role: selectedRole,
+                });
+
+                const { user: loggedInUser, token, message } = response.data;
+                setUser(loggedInUser);
+                setToken(token);
+                setGoogleLoading(false);
+                setSuccessMessage(message || `በ Google (${profile.email}) በተሳካ ሁኔታ ተመዝግበዋል! ወደ ዳሽቦርድ በመሄድ ላይ...`);
+
+                setTimeout(() => {
+                  if (loggedInUser.role === UserRole.TEACHER) {
+                    router.push('/dashboard/teacher');
+                  } else if (loggedInUser.role === UserRole.ADMIN) {
+                    router.push('/dashboard/admin');
+                  } else {
+                    router.push('/dashboard/student');
+                  }
+                }, 1200);
+              } catch (apiErr: any) {
+                setGoogleLoading(false);
+                const msg = apiErr.response?.data?.message || 'በ Google መመዝገብ አልተሳካም። እባክዎ እንደገና ይሞክሩ።';
+                setErrorMessage(Array.isArray(msg) ? msg.join(', ') : msg);
+              }
+            } else {
+              setGoogleLoading(false);
+            }
+          },
+          error_callback: () => {
+            setGoogleLoading(false);
+            setErrorMessage('የ Google መግቢያ መስኮት ተዘግቷል ወይም አልተፈቀደም።');
+          },
+        });
+
+        // "Choose an account" የሚለውን የጎግል መስኮት ያስነሳል!
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+      } catch (err: any) {
+        setGoogleLoading(false);
+        setErrorMessage('የ Google Identity አገልግሎት ማስጀመር አልተቻለም።');
+      }
+    } else {
+      setErrorMessage('የ Google Identity አገልግሎት በመጫን ላይ ነው። እባክዎ ከ1 ሰከንድ በኋላ እንደገና ይሞክሩ።');
+    }
+  };
+
   const handleSocialSignup = (provider: string) => {
     alert(`በ ${provider} የመመዝገብ አገልግሎት (OAuth) በመገናኘት ላይ ነው...`);
   };
@@ -383,28 +455,33 @@ export default function RegisterPage() {
               {/* Google */}
               <button
                 type="button"
-                onClick={() => handleSocialSignup('Google')}
-                className="flex items-center justify-center py-2.5 px-4 rounded-xl bg-navy-950 border border-navy-800 hover:border-slate-600 hover:bg-navy-900 transition-all"
+                onClick={handleGoogleSignup}
+                disabled={googleLoading}
+                className="flex items-center justify-center py-2.5 px-4 rounded-xl bg-navy-950 border border-navy-800 hover:border-slate-500 hover:bg-navy-900 transition-all group disabled:opacity-50"
                 title="በ Google ይመዝገቡ"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
+                {googleLoading ? (
+                  <div className="h-5 w-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                )}
               </button>
 
               {/* Facebook */}
@@ -458,6 +535,9 @@ export default function RegisterPage() {
         </div>
 
       </div>
+
+      {/* Google Identity Services SDK Script */}
+      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
     </div>
   );
 }

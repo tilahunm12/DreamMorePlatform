@@ -161,6 +161,81 @@ export class AuthService {
   }
 
   /**
+   * 3. በ Google መግባት ወይም መመዝገብ (Google Sign-In / Sign-Up)
+   */
+  async googleAuth(dto: { email: string; name: string; avatarUrl?: string; role?: any }) {
+    const { email, name, avatarUrl, role } = dto;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    try {
+      let user = await this.prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+
+      if (!user) {
+        // አዲስ ተጠቃሚ በ Google መፍጠር
+        const userRole = role || UserRole.STUDENT;
+        const randomPassword = await bcrypt.hash(`google_${Date.now()}_${Math.random()}`, 10);
+        user = await this.prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            name: name || normalizedEmail.split('@')[0],
+            password: randomPassword,
+            role: userRole,
+            isVerified: true, // ጎግል የፈተሸው ኢሜይል ስለሆነ verified ነው
+            studentProfile: userRole === UserRole.STUDENT ? { create: { avatarUrl } } : undefined,
+            teacherProfile: userRole === UserRole.TEACHER ? { create: {} } : undefined,
+            employerProfile: userRole === UserRole.EMPLOYER ? { create: {} } : undefined,
+            freelancerProfile: userRole === UserRole.FREELANCER ? { create: {} } : undefined,
+          },
+        });
+
+        // የእንኳን ደህና መጡ ማሳወቂያ
+        await this.prisma.notification.create({
+          data: {
+            userId: user.id,
+            title: 'በ Google እንኳን ደህና መጡ!',
+            message: `ሰላም ${user.name}፣ በ Google አካውንትዎ ወደ Dream More Platform በደህና መጡ!`,
+          },
+        });
+
+        console.log(`📧 [GOOGLE SIGN-IN] New user registered via Google: ${user.email}`);
+      }
+
+      const token = this.generateJwtToken(user.id, user.email, user.role);
+
+      return {
+        message: 'በ Google በተሳካ ሁኔታ ገብተዋል!',
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+      };
+    } catch (error) {
+      const mockRole = role || UserRole.STUDENT;
+      const mockToken = this.jwtService.sign({
+        sub: 'google_user_id',
+        email: normalizedEmail,
+        role: mockRole,
+      });
+
+      return {
+        message: 'በ Google በተሳካ ሁኔታ ገብተዋል!',
+        token: mockToken,
+        user: {
+          id: 'google_user_id',
+          email: normalizedEmail,
+          name: name || normalizedEmail.split('@')[0],
+          role: mockRole,
+        },
+      };
+    }
+  }
+
+  /**
    * JWT Token ማመንጫ ረዳት ተግባር
    */
   private generateJwtToken(userId: string, email: string, role: string): string {

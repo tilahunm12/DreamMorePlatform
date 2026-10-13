@@ -30,4 +30,13 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
+
+  /**
+   * በ Google መመዝገቢያ ወይም መግቢያ Endpoint
+   */
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  async googleAuth(@Body() body: { email: string; name: string; avatarUrl?: string; role?: any }) {
+    return this.authService.googleAuth(body);
+  }
 }
