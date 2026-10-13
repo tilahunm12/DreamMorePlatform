@@ -123,13 +123,13 @@ export default function TeacherDashboardPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => alert('አዲስ ኮርስ ማዘጋጃ ገጽ በመከፈት ላይ...')}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 transition-all self-start sm:self-auto"
+        <Link
+          href="/courses/create"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 transition-all self-start sm:self-auto hover:scale-105 active:scale-95"
         >
           <PlusCircle className="h-4 w-4" />
           <span>አዲስ ኮርስ ፍጠር</span>
-        </button>
+        </Link>
       </div>
 
       {/* 2. ቁልፍ ስታቲስቲክስ */}
