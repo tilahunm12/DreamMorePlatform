@@ -15,15 +15,17 @@ export class MailService {
     const host = this.configService.get<string>('SMTP_HOST') || process.env.SMTP_HOST;
     const port = parseInt(this.configService.get<string>('SMTP_PORT') || process.env.SMTP_PORT || '587', 10);
     const user = this.configService.get<string>('SMTP_USER') || process.env.SMTP_USER;
-    const pass = this.configService.get<string>('SMTP_PASS') || process.env.SMTP_PASS;
+    const rawPass = this.configService.get<string>('SMTP_PASS') || process.env.SMTP_PASS;
+    const pass = rawPass ? rawPass.replace(/\s+/g, '') : undefined;
 
     if (user && pass) {
       this.transporter = nodemailer.createTransport({
+        service: 'gmail',
         host: host || 'smtp.gmail.com',
         port,
         secure: port === 465,
         auth: {
-          user,
+          user: user.trim(),
           pass,
         },
       });
@@ -269,8 +271,9 @@ export class MailService {
 </html>
     `;
 
+    const userEmail = this.configService.get<string>('SMTP_USER') || process.env.SMTP_USER;
     const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') || process.env.SMTP_FROM || '"Dream More Platform" <noreply@dreammore.com>',
+      from: this.configService.get<string>('SMTP_FROM') || process.env.SMTP_FROM || (userEmail ? `"Dream More Platform" <${userEmail}>` : '"Dream More Platform" <noreply@dreammore.com>'),
       to,
       subject: `🎉 እንኳን ወደ Dream More Platform በደህና መጡ፣ ${name || 'ተጠቃሚ'}!`,
       html: htmlContent,
@@ -323,8 +326,9 @@ export class MailService {
 </html>
     `;
 
+    const userEmail = this.configService.get<string>('SMTP_USER') || process.env.SMTP_USER;
     const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') || process.env.SMTP_FROM || '"Dream More Platform" <noreply@dreammore.com>',
+      from: this.configService.get<string>('SMTP_FROM') || process.env.SMTP_FROM || (userEmail ? `"Dream More Platform" <${userEmail}>` : '"Dream More Platform" <noreply@dreammore.com>'),
       to,
       subject: `✓ የክፍያ ማረጋገጫ፡ የ${courseTitle} ኮርስ ክፍት ሆኗል!`,
       html: htmlContent,
