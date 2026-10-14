@@ -21,11 +21,13 @@ import {
   Lock,
   AlertCircle,
   Copy,
-  Check
+  Check,
+  ShoppingCart
 } from 'lucide-react';
 // የኮርሶች መረጃ
 import { COURSES_DATA } from '../../../lib/coursesData';
 import { useAuthStore } from '../../../stores/useAuthStore';
+import { useCartStore } from '../../../stores/useCartStore';
 import { apiClient } from '../../../lib/api-client';
 
 /**
@@ -35,11 +37,13 @@ import { apiClient } from '../../../lib/api-client';
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { addToCart, isInCart } = useCartStore();
   const resolvedParams = use(params);
   const courseId = resolvedParams.id;
 
   // የተመረጠውን ኮርስ ከመረጃ ቋቱ መፈለግ
   const course = COURSES_DATA.find((c) => c.id === courseId) || COURSES_DATA[0];
+  const inCart = isInCart(course.id);
 
   // 1. የክፍያ ሞዳል (Payment Modal) ሁኔታ State
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -198,22 +202,43 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
               </div>
             </div>
 
-            {/* የመመዝገቢያ አዝራር */}
-            <div className="space-y-2">
-              <Link
-                href={`/courses/${course.id}/learn`}
-                className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 transition-all hover:scale-[1.02]"
-              >
-                <PlayCircle className="h-5 w-5" />
-                <span>ትምህርቱን ጀምር (Start Learning)</span>
-              </Link>
+            {/* የመመዝገቢያ አዝራር (Udemy-Grade Actions: Add to Cart, Buy Now, Start Learning) */}
+            <div className="space-y-2.5">
               <button
-                onClick={() => setIsPaymentModalOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold text-slate-300 bg-navy-800 hover:bg-navy-700 border border-navy-700 transition-colors"
+                onClick={() => {
+                  if (!inCart) {
+                    addToCart(course);
+                  }
+                  router.push('/cart');
+                }}
+                className={`w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold text-white transition-all shadow-lg hover:scale-[1.02] ${
+                  inCart
+                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30'
+                    : 'bg-brand-500 hover:bg-brand-600 shadow-brand-500/25'
+                }`}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span>{inCart ? 'ወደ ግዢ ጋሪ ሂድ (Go to Cart)' : 'ወደ ጋሪ ጨምር (Add to Cart)'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  addToCart(course);
+                  router.push('/payment/checkout');
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-slate-100 bg-navy-800 hover:bg-navy-750 border border-navy-700 transition-all hover:scale-[1.01]"
               >
                 <ShieldCheck className="h-4 w-4 text-brand-400" />
-                <span>በቴሌብር / ባንክ ይክፈሉ (Enroll with Payment)</span>
+                <span>አሁኑኑ ግዛ (Buy Now - Telebirr / Bank)</span>
               </button>
+
+              <Link
+                href={`/courses/${course.id}/learn`}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-navy-950/60 hover:bg-navy-900 border border-navy-800 transition-colors"
+              >
+                <PlayCircle className="h-4 w-4 text-slate-500" />
+                <span>ትምህርቱን በቅድመ እይታ ጀምር (Free Preview)</span>
+              </Link>
             </div>
 
             {/* የኮርሱ ጥቅሎች ዝርዝር */}

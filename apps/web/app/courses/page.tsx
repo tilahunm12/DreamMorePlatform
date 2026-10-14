@@ -15,16 +15,20 @@ import {
   Sparkles, 
   ArrowRight,
   GraduationCap,
-  Layers
+  Layers,
+  ShoppingCart,
+  Check
 } from 'lucide-react';
 // የኮርሶቹን መረጃ ማስገባት
 import { COURSES_DATA, CourseItem } from '../../lib/coursesData';
+import { useCartStore } from '../../stores/useCartStore';
 
 /**
  * CoursesPage - የኮርሶች ዝርዝር እና መፈለጊያ ገጽ (Course Catalog)
  * ተማሪዎች ኮርሶችን በዘርፍ፣ በደረጃ፣ በዋጋ እና በፍለጋ ቃል አጣርተው የሚያዩበት ገጽ ነው።
  */
 export default function CoursesPage() {
+  const { addToCart, isInCart } = useCartStore();
   // 1. የፍለጋ ቃል State (Search Query)
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -227,13 +231,31 @@ export default function CoursesPage() {
                     </div>
                   </div>
 
-                  <Link
-                    href={`/courses/${course.id}`}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 hover:shadow-brand-500/30 transition-all hover:scale-105"
-                  >
-                    <span>ዝርዝሩን እይ</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => addToCart(course)}
+                      title={isInCart(course.id) ? 'በጋሪው ውስጥ አለ' : 'ወደ ጋሪ ጨምር'}
+                      className={`p-2.5 rounded-xl border transition-all ${
+                        isInCart(course.id)
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                          : 'bg-navy-950 border-navy-800 text-slate-400 hover:text-white hover:border-brand-500'
+                      }`}
+                    >
+                      {isInCart(course.id) ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <ShoppingCart className="h-4 w-4" />
+                      )}
+                    </button>
+
+                    <Link
+                      href={`/courses/${course.id}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 shadow-md shadow-brand-500/20 hover:shadow-brand-500/30 transition-all hover:scale-105"
+                    >
+                      <span>ዝርዝሩን እይ</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
                 </div>
 
               </div>

@@ -15,9 +15,11 @@ import {
   UserPlus,
   LayoutDashboard,
   LogOut,
-  User as UserIcon
+  User as UserIcon,
+  ShoppingCart
 } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
+import { useCartStore } from '../stores/useCartStore';
 import { UserRole } from '@dream-more/shared';
 import { getRoleDashboardPath, getRoleLabel } from '../lib/navigation';
 
@@ -28,6 +30,7 @@ import { getRoleDashboardPath, getRoleLabel } from '../lib/navigation';
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  const { items: cartItems } = useCartStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -90,6 +93,20 @@ export default function Navbar() {
 
         {/* የመግቢያ እና የመመዝገቢያ ወይም የዳሽቦርድ አዝራሮች (Action Buttons) */}
         <div className="hidden md:flex items-center gap-3">
+          {/* የግዢ ጋሪ (Shopping Cart - Udemy Style) */}
+          <Link
+            href="/cart"
+            className="relative p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-navy-800 transition-all border border-navy-800/80 hover:border-navy-700 mr-1"
+            title="የግዢ ጋሪ (Shopping Cart)"
+          >
+            <ShoppingCart className="h-5 w-5 text-brand-400" />
+            {mounted && cartItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-brand-500 text-white font-black text-[10px] flex items-center justify-center shadow-lg shadow-brand-500/50">
+                {cartItems.length}
+              </span>
+            )}
+          </Link>
+
           {mounted && user ? (
             <div className="flex items-center gap-3">
               <Link
@@ -141,7 +158,19 @@ export default function Navbar() {
         </div>
 
         {/* ለስልክ ስክሪን የሚሆን የማውጫ መክፈቻ ቁልፍ (Mobile Menu Button) */}
-        <div className="flex md:hidden">
+        <div className="flex md:hidden items-center gap-2">
+          <Link
+            href="/cart"
+            className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-navy-800 transition-colors"
+            title="የግዢ ጋሪ"
+          >
+            <ShoppingCart className="h-5 w-5 text-brand-400" />
+            {mounted && cartItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-brand-500 text-white font-bold text-[9px] flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
+          </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-white hover:bg-navy-800 transition-colors"
