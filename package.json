@@ -12,6 +12,7 @@
     "dev:api": "npm --prefix apps/api run start:dev",
     "build": "npm --prefix packages/shared run build && npm --prefix apps/api run build && npm --prefix apps/web run build",
     "build:api": "npm --prefix packages/shared run build && npm --prefix apps/api run prisma:generate && npm --prefix apps/api run build",
+    "start": "npm run start:api",
     "start:api": "npm --prefix apps/api run start:prod",
     "db:generate": "npm --prefix apps/api run prisma:generate",
     "db:migrate": "npm --prefix apps/api run prisma:migrate",
