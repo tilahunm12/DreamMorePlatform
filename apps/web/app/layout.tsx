@@ -1,5 +1,6 @@
 import './globals.css';
 import React from 'react';
+import Script from 'next/script';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -21,7 +22,27 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+
+        {/* Dify AI Chatbot Integration */}
+        <Script id="dify-chatbot-config" strategy="afterInteractive">
+          {`
+            window.difyChatbotConfig = {
+              token: 'gITPbpECtPr3Vpgy',
+              baseUrl: 'https://udify.app',
+              inputs: {},
+              systemVariables: {},
+              userVariables: {},
+            };
+          `}
+        </Script>
+        <Script
+          src="https://udify.app/embed.min.js"
+          id="gITPbpECtPr3Vpgy"
+          defer
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
 }
+

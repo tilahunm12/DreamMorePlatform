@@ -23,3 +23,17 @@ body {
   background-color: #f37021;
   color: #ffffff;
 }
+
+/* Dify AI Chatbot Custom Styling */
+#dify-chatbot-bubble-button {
+  background-color: #1C64F2 !important;
+  z-index: 99999 !important;
+}
+#dify-chatbot-bubble-window {
+  width: 24rem !important;
+  height: 40rem !important;
+  max-width: 92vw !important;
+  max-height: 85vh !important;
+  z-index: 99999 !important;
+}
+
